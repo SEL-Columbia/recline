@@ -1879,7 +1879,9 @@ my.Query = Backbone.Model.extend({
     // crude deep copy
     var ourfilter = JSON.parse(JSON.stringify(filter));
     // not fully specified so use template and over-write
-    if (_.keys(filter).length <= 3) {
+    // modilabs: if type is not in filterTemplates and filter is not fully initialised - take as is
+    if(_.has(this._filterTemplates, filter.type) && _.keys(filter).length <
+        _.keys(this._filterTemplates[filter.type]).length){
       ourfilter = _.extend(
         // crude deep copy
         JSON.parse(JSON.stringify(this._filterTemplates[filter.type])),
