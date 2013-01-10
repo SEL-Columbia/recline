@@ -4147,6 +4147,63 @@ my.SlickGrid = Backbone.View.extend({
 
   hide: function() {
     this.visible = false;
+  },
+
+  // set columns to show on the grid - meant to be used after grid is init-ed, if not, grid will be init-ed first
+  setColumns: function(columnsToShow) {
+      if(!columnsToShow.length)
+            return;
+      var self = this;
+      var visibleColumns = [];
+      var hiddenColumnsIds = [];
+      var formatter = function(row, cell, value, columnDef, dataContext) {
+          var field = self.model.fields.get(columnDef.id);
+          if (field.renderer) {
+              return field.renderer(value, field, dataContext);
+          } else {
+              return value;
+          }
+      }
+      _.each(this.model.fields.toJSON(),function(field){
+          // check if this column is in put to show list
+          var foundColumn = _.find(columnsToShow, function(columnName){
+              return field['id'] == columnName;
+          });
+          if(foundColumn){
+              var column = {
+                  id:field['id'],
+                  name:field['label'],
+                  field:field['id'],
+                  sortable: true,
+                  minWidth: 80,
+                  formatter: formatter
+              };
+
+              var widthInfo = _.find(self.state.get('columnsWidth'),function(c){return c.column == field.id});
+              if (widthInfo){
+                  column['width'] = widthInfo.width;
+              }
+
+              var editInfo = _.find(self.state.get('columnsEditor'),function(c){return c.column == field.id});
+              if (editInfo){
+                  column['editor'] = editInfo.editor;
+              }
+              visibleColumns.push(column);
+          }
+          else
+          {
+              hiddenColumnsIds.push(field['id']);
+          }
+      });
+      if (!this.rendered){
+          if (!this.grid){
+              this.render();
+          }
+          this.grid.init();
+          this.rendered = true;
+      }
+      this.grid.setColumns(visibleColumns);
+      this.state.set({hiddenColumns:hiddenColumnsIds});
   }
 });
 
