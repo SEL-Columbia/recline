@@ -4118,6 +4118,12 @@ my.SlickGrid = Backbone.View.extend({
       model.set(v);
     });
 
+    this.grid.onDblClick.subscribe(function (e, args){
+        var cell = this.getCellFromEvent(e)
+        var record = this.getData().getModel(cell.row);
+        self.trigger("doubleclick", record);
+    });
+
     var columnpicker = new Slick.Controls.ColumnPicker(columns, this.grid,
                                                        _.extend(options,{state:this.state}));
 
